@@ -3,6 +3,8 @@
 ## 1. Overview
 The Obsidian Finance Tracker is a community plugin for Obsidian that allows users to manage financial accounts and log transactions entirely within markdown files. It uses a strict ledger approach where account balances are stored in YAML frontmatter and mutated upon transaction entry, while individual transactions are stored as historical markdown notes.
 
+**Compatibility:** The plugin must work seamlessly on both **Mobile and Desktop** versions of Obsidian. This means strictly relying on Obsidian's internal `Vault` and `FileManager` APIs, and completely avoiding Node.js or Electron-specific APIs (like `fs` or `path`).
+
 ## 2. Configuration & Settings
 The plugin will have a settings tab providing the following controls:
 *   **Parent Folder:** A text input defining the root folder for all financial data (e.g., `Finance`). Default: `Finance`.
