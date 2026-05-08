@@ -1,36 +1,46 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
+import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
+import FinanceTrackerPlugin from './main';
 
-export interface MyPluginSettings {
-	mySetting: string;
+export interface CategoryDef {
+    name: string;
+    subcategories: string[];
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+export interface FinanceTrackerSettings {
+    parentFolder: string;
+    categories: CategoryDef[];
 }
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export const DEFAULT_SETTINGS: FinanceTrackerSettings = {
+    parentFolder: 'Finance',
+    categories: [
+        { name: 'Income', subcategories: ['Salary', 'Gift'] },
+        { name: 'Expense', subcategories: ['Food', 'Transport'] }
+    ]
+}
 
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+export class FinanceTrackerSettingTab extends PluginSettingTab {
+    plugin: FinanceTrackerPlugin;
 
-	display(): void {
-		const {containerEl} = this;
+    constructor(app: App, plugin: FinanceTrackerPlugin) {
+        super(app, plugin);
+        this.plugin = plugin;
+    }
 
-		containerEl.empty();
+    display(): void {
+        const {containerEl} = this;
+        containerEl.empty();
+        containerEl.createEl('h2', {text: 'Finance Tracker Settings'});
 
-		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+        new Setting(containerEl)
+            .setName('Parent Folder')
+            .setDesc('Root folder for accounts and transactions')
+            .addText(text => text
+                .setPlaceholder('Finance')
+                .setValue(this.plugin.settings.parentFolder)
+                .onChange(async (value) => {
+                    this.plugin.settings.parentFolder = value;
+                    await this.plugin.saveSettings();
+                }));
+    }
 }
