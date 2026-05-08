@@ -44,6 +44,7 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        // --- Account Creation Section ---
         containerEl.createEl('h3', {text: 'Create New Account'});
 
         let newAccountName = '';
@@ -84,5 +85,72 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
                         new Notice(`Error: ${e.message}`);
                     }
                 }));
+
+        // --- Categories Management Section ---
+        containerEl.createEl('h3', {text: 'Manage Categories'});
+
+        let newCategoryName = '';
+        new Setting(containerEl)
+            .setName('Add New Category')
+            .addText(text => text.setPlaceholder('Category Name').onChange(val => newCategoryName = val))
+            .addButton(btn => btn
+                .setButtonText('Add Category')
+                .setCta()
+                .onClick(async () => {
+                    if (newCategoryName && !this.plugin.settings.categories.find(c => c.name === newCategoryName)) {
+                        this.plugin.settings.categories.push({ name: newCategoryName, subcategories: [] });
+                        await this.plugin.saveSettings();
+                        this.display(); // Re-render to show new category
+                    } else if (newCategoryName) {
+                        new Notice('Category already exists');
+                    }
+                }));
+
+        this.plugin.settings.categories.forEach((category, catIndex) => {
+            const catContainer = containerEl.createDiv('category-container');
+            catContainer.style.border = '1px solid var(--background-modifier-border)';
+            catContainer.style.padding = '10px';
+            catContainer.style.marginBottom = '10px';
+            catContainer.style.borderRadius = '5px';
+
+            new Setting(catContainer)
+                .setName(category.name)
+                .setHeading()
+                .addButton(btn => btn
+                    .setButtonText('Delete Category')
+                    .setWarning()
+                    .onClick(async () => {
+                        this.plugin.settings.categories.splice(catIndex, 1);
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }));
+
+            category.subcategories.forEach((sub, subIndex) => {
+                new Setting(catContainer)
+                    .setName(`- ${sub}`)
+                    .addButton(btn => btn
+                        .setIcon('trash')
+                        .setTooltip('Delete Subcategory')
+                        .onClick(async () => {
+                            category.subcategories.splice(subIndex, 1);
+                            await this.plugin.saveSettings();
+                            this.display();
+                        }));
+            });
+
+            let newSubName = '';
+            new Setting(catContainer)
+                .setName('Add Subcategory')
+                .addText(text => text.setPlaceholder('Subcategory Name').onChange(val => newSubName = val))
+                .addButton(btn => btn
+                    .setButtonText('Add Subcategory')
+                    .onClick(async () => {
+                        if (newSubName && !category.subcategories.includes(newSubName)) {
+                            category.subcategories.push(newSubName);
+                            await this.plugin.saveSettings();
+                            this.display();
+                        }
+                    }));
+        });
     }
 }

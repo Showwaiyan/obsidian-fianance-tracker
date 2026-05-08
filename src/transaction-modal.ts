@@ -1,4 +1,4 @@
-import { App, Modal, Setting, Notice, TFile, TFolder, moment } from 'obsidian';
+import { App, Modal, Setting, Notice, TFile, TFolder, moment, DropdownComponent } from 'obsidian';
 import FinanceTrackerPlugin from './main';
 import { TransactionService, TransactionPayload } from './transaction-service';
 
@@ -57,20 +57,49 @@ export class TransactionModal extends Modal {
                 .setValue(this.payload.date!)
                 .onChange(val => this.payload.date = val));
 
-        // Basic category mapping for MVP UI
         const cats = this.plugin.settings.categories.map(c => c.name);
         if (cats.length > 0) this.payload.category = cats[0];
         
+        let subcatDropdown: DropdownComponent;
+
         new Setting(contentEl)
             .setName('Category')
             .addDropdown(drop => {
                 cats.forEach(c => drop.addOption(c, c));
-                drop.onChange(val => this.payload.category = val);
+                drop.onChange(val => {
+                    this.payload.category = val;
+                    // Dynamically update subcategories dropdown when category changes
+                    const selectedCat = this.plugin.settings.categories.find(c => c.name === val);
+                    const subcats = selectedCat ? selectedCat.subcategories : [];
+                    
+                    subcatDropdown.selectEl.empty();
+                    if (subcats.length > 0) {
+                        subcats.forEach(s => subcatDropdown.addOption(s, s));
+                        this.payload.subcategory = subcats[0];
+                    } else {
+                        subcatDropdown.addOption('', 'None');
+                        this.payload.subcategory = '';
+                    }
+                });
             });
 
         new Setting(contentEl)
             .setName('Subcategory')
-            .addText(text => text.onChange(val => this.payload.subcategory = val));
+            .addDropdown(drop => {
+                subcatDropdown = drop;
+                const initialCat = this.plugin.settings.categories.find(c => c.name === this.payload.category);
+                const initialSubcats = initialCat ? initialCat.subcategories : [];
+                
+                if (initialSubcats.length > 0) {
+                    initialSubcats.forEach(s => drop.addOption(s, s));
+                    this.payload.subcategory = initialSubcats[0];
+                } else {
+                    drop.addOption('', 'None');
+                    this.payload.subcategory = '';
+                }
+                
+                drop.onChange(val => this.payload.subcategory = val);
+            });
 
         new Setting(contentEl)
             .setName('Note')
