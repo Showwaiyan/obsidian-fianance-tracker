@@ -33,10 +33,9 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
     display(): void {
         const {containerEl} = this;
         containerEl.empty();
-        containerEl.createEl('h2', {text: 'Finance Tracker Settings'});
 
         new Setting(containerEl)
-            .setName('Parent Folder')
+            .setName('Parent folder')
             .setDesc('Root folder for accounts and transactions')
             .addText(text => text
                 .setPlaceholder('Finance')
@@ -47,18 +46,18 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
                 }));
 
         // --- Account Creation Section ---
-        containerEl.createEl('h3', {text: 'Create New Account'});
+        new Setting(containerEl).setName("Create new account").setHeading();
 
         let newAccountName = '';
         let newAccountBalance = '0';
         let newAccountCurrency = 'USD';
 
         new Setting(containerEl)
-            .setName('Account Name')
+            .setName('Account name')
             .addText(text => text.onChange(val => newAccountName = val));
 
         new Setting(containerEl)
-            .setName('Initial Balance')
+            .setName('Initial balance')
             .addText(text => text.onChange(val => newAccountBalance = val));
 
         new Setting(containerEl)
@@ -67,7 +66,7 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .addButton(btn => btn
-                .setButtonText('Create Account')
+                .setButtonText('Create account')
                 .setCta()
                 .onClick(async () => {
                     if (!newAccountName) {
@@ -83,20 +82,21 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
                             newAccountCurrency
                         );
                         new Notice(`Account ${newAccountName} created`);
-                    } catch (e: any) {
-                        new Notice(`Error: ${e.message}`);
+                    } catch (e: unknown) {
+                        const message = e instanceof Error ? e.message : 'Unknown error';
+                        new Notice(`Error: ${message}`);
                     }
                 }));
 
         // --- Categories Management Section ---
-        containerEl.createEl('h3', {text: 'Manage Categories'});
+        new Setting(containerEl).setName("Manage categories").setHeading();
 
         let newCategoryName = '';
         new Setting(containerEl)
-            .setName('Add New Category')
-            .addText(text => text.setPlaceholder('Category Name').onChange(val => newCategoryName = val))
+            .setName('Add new category')
+            .addText(text => text.setPlaceholder('Category name').onChange(val => newCategoryName = val))
             .addButton(btn => btn
-                .setButtonText('Add Category')
+                .setButtonText('Add category')
                 .setCta()
                 .onClick(async () => {
                     if (newCategoryName && !this.plugin.settings.categories.find(c => c.name === newCategoryName)) {
@@ -110,16 +110,13 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
 
         this.plugin.settings.categories.forEach((category, catIndex) => {
             const catContainer = containerEl.createDiv('category-container');
-            catContainer.style.border = '1px solid var(--background-modifier-border)';
-            catContainer.style.padding = '10px';
-            catContainer.style.marginBottom = '10px';
-            catContainer.style.borderRadius = '5px';
+            catContainer.setCssProps({border: '1px solid var(--background-modifier-border)', padding: '10px', marginBottom: '10px', borderRadius: '5px'});
 
             new Setting(catContainer)
                 .setName(category.name)
                 .setHeading()
                 .addButton(btn => btn
-                    .setButtonText('Delete Category')
+                    .setButtonText('Delete category')
                     .setWarning()
                     .onClick(async () => {
                         this.plugin.settings.categories.splice(catIndex, 1);
@@ -132,7 +129,7 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
                     .setName(`- ${sub}`)
                     .addButton(btn => btn
                         .setIcon('trash')
-                        .setTooltip('Delete Subcategory')
+                        .setTooltip('Delete subcategory')
                         .onClick(async () => {
                             category.subcategories.splice(subIndex, 1);
                             await this.plugin.saveSettings();
@@ -142,10 +139,10 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
 
             let newSubName = '';
             new Setting(catContainer)
-                .setName('Add Subcategory')
-                .addText(text => text.setPlaceholder('Subcategory Name').onChange(val => newSubName = val))
+                .setName('Add subcategory')
+                .addText(text => text.setPlaceholder('Subcategory name').onChange(val => newSubName = val))
                 .addButton(btn => btn
-                    .setButtonText('Add Subcategory')
+                    .setButtonText('Add subcategory')
                     .onClick(async () => {
                         if (newSubName && !category.subcategories.includes(newSubName)) {
                             category.subcategories.push(newSubName);

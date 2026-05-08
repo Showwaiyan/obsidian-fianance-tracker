@@ -48,11 +48,12 @@ ${payload.description}`;
 
         // 3. Mutate Account Ledger
         await this.app.fileManager.processFrontMatter(accountFile, (frontmatter) => {
-            const currentBalance = typeof frontmatter.balance === 'number' ? frontmatter.balance : 0;
+            const fm = frontmatter as { balance?: number };
+            const currentBalance = Number(fm.balance) || 0;
             if (payload.type === 'income') {
-                frontmatter.balance = currentBalance + payload.amount;
+                fm.balance = currentBalance + payload.amount;
             } else {
-                frontmatter.balance = currentBalance - payload.amount;
+                fm.balance = currentBalance - payload.amount;
             }
         });
     }

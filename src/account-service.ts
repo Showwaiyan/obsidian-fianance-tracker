@@ -1,4 +1,4 @@
-import { App, TFolder } from 'obsidian';
+import { App } from 'obsidian';
 
 export class AccountService {
     constructor(private app: App) {}
