@@ -23,9 +23,8 @@ jobs:
           npm install
           npm run build
 
-      # Skip lint due to strict obsidianmd plugin rules
-      # - name: Lint
-      #   run: npm run lint
+      - name: Lint
+        run: npm run lint
 
       - name: Create release
         env:
