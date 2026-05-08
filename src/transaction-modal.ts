@@ -16,7 +16,7 @@ export class TransactionModal extends Modal {
         const {contentEl} = this;
         contentEl.createEl('h2', {text: 'New transaction'});
 
-        const accountsFolder = this.app.vault.getAbstractFileByPath(`${this.plugin.settings.parentFolder}/Accounts`);
+        const accountsFolder = this.app.vault.getAbstractFileByPath(`${this.plugin.settings.parentFolder}/accounts`);
         const accounts: string[] = [];
         if (accountsFolder instanceof TFolder) {
             accountsFolder.children.forEach(c => {

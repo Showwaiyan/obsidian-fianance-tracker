@@ -4,9 +4,9 @@ export class AccountService {
     constructor(private app: App) {}
 
     async createAccount(parentFolder: string, name: string, balance: number, currency: string): Promise<void> {
-        const accountsPath = `${parentFolder}/Accounts`;
+        const accountsPath = `${parentFolder}/accounts`;
         
-        // Ensure Accounts folder exists
+        // Ensure accounts folder exists
         const folder = this.app.vault.getAbstractFileByPath(accountsPath);
         if (!folder) {
             await this.ensureFolderExists(parentFolder);

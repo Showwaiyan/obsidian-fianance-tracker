@@ -16,7 +16,7 @@ export class TransactionService {
 
     async createTransaction(parentFolder: string, payload: TransactionPayload): Promise<void> {
         // 1. Verify account exists
-        const accountFile = this.app.vault.getAbstractFileByPath(`${parentFolder}/Accounts/${payload.accountName}.md`);
+        const accountFile = this.app.vault.getAbstractFileByPath(`${parentFolder}/accounts/${payload.accountName}.md`);
         if (!accountFile || !(accountFile instanceof TFile)) {
             throw new Error(`Account ${payload.accountName} not found.`);
         }
