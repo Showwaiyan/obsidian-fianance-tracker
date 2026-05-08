@@ -15,8 +15,10 @@ export interface FinanceTrackerSettings {
 export const DEFAULT_SETTINGS: FinanceTrackerSettings = {
     parentFolder: 'Finance',
     categories: [
-        { name: 'Income', subcategories: ['Salary', 'Gift'] },
-        { name: 'Expense', subcategories: ['Food', 'Transport'] }
+        { name: 'Food', subcategories: ['Breakfast', 'Lunch', 'Dinner', 'Groceries'] },
+        { name: 'Transport', subcategories: ['Gas', 'Transit', 'Maintenance'] },
+        { name: 'Utilities', subcategories: ['Internet', 'Electricity', 'Water'] },
+        { name: 'Shopping', subcategories: ['Clothing', 'Electronics'] }
     ]
 }
 
