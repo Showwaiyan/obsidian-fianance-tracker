@@ -8,8 +8,17 @@ export default class FinanceTrackerPlugin extends Plugin {
     async onload() {
         await this.loadSettings();
         
-        this.addRibbonIcon('coins', 'New Transaction', (evt: MouseEvent) => {
+        // Changed from 'coins' to 'dollar-sign' to ensure compatibility with Obsidian's bundled lucide icons
+        this.addRibbonIcon('dollar-sign', 'New Transaction', (evt: MouseEvent) => {
             new TransactionModal(this.app, this).open();
+        });
+
+        this.addCommand({
+            id: 'open-new-transaction-modal',
+            name: 'Create New Transaction',
+            callback: () => {
+                new TransactionModal(this.app, this).open();
+            }
         });
 
         this.addSettingTab(new FinanceTrackerSettingTab(this.app, this));
