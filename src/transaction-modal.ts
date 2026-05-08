@@ -14,7 +14,7 @@ export class TransactionModal extends Modal {
 
     onOpen(): void {
         const {contentEl} = this;
-        contentEl.createEl('h2', {text: 'New Transaction'});
+        contentEl.createEl('h2', {text: 'New transaction'});
 
         const accountsFolder = this.app.vault.getAbstractFileByPath(`${this.plugin.settings.parentFolder}/Accounts`);
         const accounts: string[] = [];
@@ -36,7 +36,9 @@ export class TransactionModal extends Modal {
             .addDropdown(drop => {
                 drop.addOption('expense', 'Expense');
                 drop.addOption('income', 'Income');
-                drop.onChange(() => { return; });
+                drop.onChange(async (val: string) => {
+                    this.payload.type = val as 'income'|'expense';
+                });
             });
 
         // Account dropdown
@@ -44,7 +46,9 @@ export class TransactionModal extends Modal {
             .setName('Account')
             .addDropdown(drop => {
                 accounts.forEach(acc => drop.addOption(acc, acc));
-                drop.onChange(() => { return; });
+                drop.onChange(async (val: string) => {
+                    this.payload.accountName = val;
+                });
             });
 
         // Amount
@@ -52,24 +56,31 @@ export class TransactionModal extends Modal {
             .setName('Amount')
             .addText(text => text
                 .setPlaceholder('0.00')
-                .onChange(() => { return; }));
+                .onChange(async (val: string) => {
+                    this.payload.amount = parseFloat(val);
+                }));
 
         // Date
         new Setting(contentEl)
             .setName('Date')
             .addText(text => text
                 .setValue(this.payload.date!)
-                .onChange(() => { return; }));
+                .onChange(async (val: string) => {
+                    this.payload.date = val;
+                }));
 
         const cats = this.plugin.settings.categories.map(c => c.name);
         if (cats.length > 0) this.payload.category = cats[0];
         
         // Category dropdown
+        const catsList = cats;
         new Setting(contentEl)
             .setName('Category')
             .addDropdown(drop => {
-                cats.forEach(c => drop.addOption(c, c));
-                drop.onChange(() => { return; });
+                catsList.forEach(c => drop.addOption(c, c));
+                drop.onChange(async (val: string) => {
+                    this.payload.category = val;
+                });
             });
 
         // Subcategory dropdown
@@ -77,45 +88,45 @@ export class TransactionModal extends Modal {
             .setName('Subcategory')
             .addDropdown(drop => {
                 drop.addOption('', 'None');
-                drop.onChange(() => { return; });
+                drop.onChange(async (val: string) => {
+                    this.payload.subcategory = val;
+                });
             });
 
         // Note
         new Setting(contentEl)
             .setName('Note')
-            .addText(text => text.onChange(() => { return; }));
+            .addText(text => text.onChange(async (val: string) => {
+                this.payload.note = val;
+            }));
 
         // Description
         new Setting(contentEl)
             .setName('Description')
-            .addTextArea(text => text.onChange(() => { return; }));
+            .addTextArea(text => text.onChange(async (val: string) => {
+                this.payload.description = val;
+            }));
 
         // Save button
         new Setting(contentEl)
             .addButton(btn => btn
-                .setButtonText('Save transaction')
+                .setButtonText('Save Transaction')
                 .setCta()
-                .onClick(() => {
+                .onClick(async () => {
                     if (!this.payload.amount || !this.payload.accountName || !this.payload.category) {
                         new Notice('Amount, Account, and Category are required.');
                         return;
                     }
-                    this.doSave();
+                    try {
+                        const service = new TransactionService(this.app);
+                        await service.createTransaction(this.plugin.settings.parentFolder, this.payload as TransactionPayload);
+                        new Notice('Transaction saved!');
+                        this.close();
+                    } catch (e: unknown) {
+                        const message = e instanceof Error ? e.message : 'Unknown error';
+                        new Notice(`Error: ${message}`);
+                    }
                 }));
-    }
-
-    /* eslint-disable @typescript-eslint/no-misused-promises */
-    doSave(): void {
-        const service = new TransactionService(this.app);
-        service.createTransaction(this.plugin.settings.parentFolder, this.payload as TransactionPayload)
-            .then(() => {
-                new Notice('Transaction saved!');
-                this.close();
-            })
-            .catch((e: unknown) => {
-                const message = e instanceof Error ? e.message : 'Unknown error';
-                new Notice(`Error: ${message}`);
-            });
     }
 
     onClose(): void {
