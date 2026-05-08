@@ -1,5 +1,6 @@
 import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
 import FinanceTrackerPlugin from './main';
+import { AccountService } from './account-service';
 
 export interface CategoryDef {
     name: string;
@@ -41,6 +42,47 @@ export class FinanceTrackerSettingTab extends PluginSettingTab {
                 .onChange(async (value) => {
                     this.plugin.settings.parentFolder = value;
                     await this.plugin.saveSettings();
+                }));
+
+        containerEl.createEl('h3', {text: 'Create New Account'});
+
+        let newAccountName = '';
+        let newAccountBalance = '0';
+        let newAccountCurrency = 'USD';
+
+        new Setting(containerEl)
+            .setName('Account Name')
+            .addText(text => text.onChange(val => newAccountName = val));
+
+        new Setting(containerEl)
+            .setName('Initial Balance')
+            .addText(text => text.onChange(val => newAccountBalance = val));
+
+        new Setting(containerEl)
+            .setName('Currency')
+            .addText(text => text.onChange(val => newAccountCurrency = val));
+
+        new Setting(containerEl)
+            .addButton(btn => btn
+                .setButtonText('Create Account')
+                .setCta()
+                .onClick(async () => {
+                    if (!newAccountName) {
+                        new Notice('Account name is required');
+                        return;
+                    }
+                    try {
+                        const service = new AccountService(this.app);
+                        await service.createAccount(
+                            this.plugin.settings.parentFolder, 
+                            newAccountName, 
+                            parseFloat(newAccountBalance), 
+                            newAccountCurrency
+                        );
+                        new Notice(`Account ${newAccountName} created`);
+                    } catch (e: any) {
+                        new Notice(`Error: ${e.message}`);
+                    }
                 }));
     }
 }
